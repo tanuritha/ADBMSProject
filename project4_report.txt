@@ -1,0 +1,72 @@
+1. Basic information
+Team number (e.g., 01) : 07
+#1 Student ID : W1650178
+#1 Student Name : Tanuritha Patlapati
+#2 Student ID : W1651319
+#2 Student Name : Vedica Umesh Rao
+#3 Student ID : W1648629
+#3 Student Name : Suyash Jaju
+OS (bit) :  IOS Monterey 12.5(64 bit)
+gcc version :   clang-1400.0.29.202
+
+
+2. Catalog information about Index
+- Show your catalog information about an index (tables, columns). 
+
+
+3. Block Nested Loop Join (If you have implemented this feature)
+- Describe how your block nested loop join works (especially, how you manage the given buffers.)
+
+
+4. Index Nested Loop Join (If you have implemented this feature)
+- Describe how your grace hash join works.
+
+
+5. Grace Hash Join (If you have implemented this feature)
+- Describe how your grace hash join works (especially, in-memory structure).
+
+
+6. Aggregation
+- Describe how your aggregation (basic, group-based hash) works.
+
+
+7. Implementation Detail
+
+1. Filter Interface
+The Filter interface is used to filter out tuples that do not meet a certain selection condition. It has two methods:
+
+A. getNextTuple(): This method retrieves the next tuple from the input iterator and checks whether it satisfies the selection condition. If the tuple satisfies the condition, it is returned. If not, the method calls getNextTuple() again to retrieve the next tuple and repeats the process.
+
+The method works by repeatedly calling getNextTuple() on the input iterator until it returns -1, indicating that there are no more tuples to retrieve. For each tuple retrieved, the method uses the getAttrFromTuple() function to extract the value of the attribute specified in the selection condition (cond->lhsAttr) from the tuple.
+
+The method then retrieves the comparison value (cond->rhsValue) from the selection condition and stores it in compVal. If the comparison value is a varchar, it is first decoded by reading its length and then copying the data to compVal.
+
+Finally, the method uses the check_Match() function to compare the attribute value (attrVal) and the comparison value (compVal) using the operator specified in the selection condition (cond->op). If the comparison is true, the method returns 0 to indicate that the tuple satisfies the selection condition. If not, the method moves on to the next tuple.
+
+Once all tuples have been checked, the method returns -1 to indicate that there are no more tuples that satisfy the selection condition.
+
+
+B. getAttributes(): This method returns the list of attributes from the Filter in the intermediate relation resulted from this iterator.
+
+This function, getAttrFromTuple(), is used to retrieve the value of a specific attribute from a tuple. It takes in the following parameters:
+
+a. attrs: A vector of Attribute objects that describes the schema of the tuple.
+b. attrName: The name of the attribute to retrieve.
+c. data: A pointer to the beginning of the tuple data.
+d. value: A pointer to a buffer where the retrieved attribute value will be stored.
+
+The function returns 0 if successful, and -1 if the specified attribute does not exist in the schema.
+
+
+2. Project Interface
+
+The Project interface is used to select a subset of attributes from each tuple. It has two methods:
+
+getNextTuple(): The getNextTuple method is used to retrieve the next tuple from the input iterator and to project only the required attributes. It does this by calling getAttrsFromTuple function which retrieves the required attributes from the input tuple and populates the output tuple. If it successfully retrieves the required attributes, it returns 0 indicating success. Otherwise, it continues to loop and fetch the next tuple from the input iterator until there are no more tuples.
+
+getAttributes(): This method returns the list of attributes in the intermediate relation resulted from this iterator.
+
+
+6. Other (optional)
+- Freely use this section to tell us about things that are related to the project 4, but not related to the other sections (optional)
+

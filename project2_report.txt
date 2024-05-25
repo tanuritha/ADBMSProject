@@ -1,0 +1,84 @@
+1. Basic information
+Team number (e.g., 01) : 07
+#1 Student ID : W1650178
+#1 Student Name : Tanuritha Patlapati
+#2 Student ID : W1651319
+#2 Student Name : Vedica Umesh Rao
+#3 Student ID : W1648629
+#3 Student Name : Suyash Jaju
+OS (bit) :  IOS Monterey 12.5(64 bit)
+gcc version :   clang-1400.0.29.202
+
+
+2. Meta-data
+- Show your meta-data design (Tables and Columns table) and information about each column.
+
+    Tables (table-id:int, table-name:varchar(50), file-name:varchar(50))
+    Columns(table-id:int, column-name:varchar(50), column-type:int, column-length:int, column-position:int)
+
+
+3. Internal Record Format
+- Show your record format design and describe how your design satisfies O(1) field access. If not, just mention that your team hasn't implemented this feature.
+- Describe how you store a VarChar field.
+- Describe how you deal with an update and delete.
+
+The internal Record Format consists of the following 
+  -A nullsIndicator, indicating with each bit whether the corresponding attribute is null or not.
+  -An array of field offsets for each attribute(the address of the last byte of each attrbute is accessed by the record's base address and the field offset directory plus the fieldoffset).
+  -The data is of format <size of attribute value><attribute value> in case of a variable length, and simply <attribute value> in fixed length data value.
+
+  -A VarChar field is stored in <size of field Value><field Value> format.
+
+  -Delete record deletes the record in the page, sets its offset in the slot as -1, and shifts up all the slot offsets succeeding the record to offset-deletedRecordLength.
+
+
+
+4. Page Format
+- Show your page format design.
+- Describe how you deal with an update and delete.
+
+ Our page format design is a slotted page directory.
+  It consists of a footer which has the following:
+  -The last 4 bytes stores an integer which is the offset for free space.
+  -The 4 bytes preceeding that stores the number of slots.
+  -This is followed by the slot directory which holds offsets to the records.
+  
+  -Delete record deletes the record in the page, sets its offset in the slot as -1, and shifts up all the slot offsets succeeding the record to offset-deletedRecordLength.
+
+
+
+5. File Format
+- Show your file format design
+
+    -A file is created for every table, and is named the table-name.tbl
+    -Tables.tbl file stores the Tables table and Columns.tbl file stores the Column details.
+
+
+6. Implementation Detail
+- Other implementation details goes here.
+
+createCatalog: creates the system catalog tables (TABLES and COLUMNS) and adds metadata for these tables to the system catalog.
+
+deleteCatalog: deletes the system catalog tables (TABLES and COLUMNS) and removes their metadata from the system catalog.
+
+createTable: creates a new table with the specified attributes and adds metadata for the new table to the system catalog.
+
+deleteTable: deletes the specified table and removes its metadata from the system catalog.
+
+getAttributes: retrieves the attributes for the specified table and stores them in the provided vector.
+
+insertTuple: inserts a new tuple into the specified table.
+
+deleteTuple: deletes the tuple with the specified RID from the specified table.
+
+readTuple: reads the tuple with the specified RID from the specified table and stores the result in the provided buffer.
+
+printTuple: prints the tuple with the specified attributes and data to stdout.
+
+updateTuple: updates the tuple with the specified RID in the specified table with the provided data.
+
+readAttribute: reads the specified attribute for the tuple with the specified RID from the specified table and stores the result in the provided buffer.
+
+7. Other (optional)
+- Freely use this section to tell us about things that are related to the project 2, but not related to the other sections (optional)
+

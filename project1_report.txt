@@ -1,0 +1,84 @@
+1. Basic information
+Student ID : W1650178, W1651319, W1648629
+Student Name : Tanuritha Patlapati, Vedica Umesh Rao, Suyash Jaju
+OS (bit) : IOS Monterey 12.5(64 bit)
+gcc version : clang-1400.0.29.202
+
+
+2. Internal Record Format
+- Show your record format design and describe how your design satisfies O(1) field access. If not, just mention that you haven't implemented this feature.
+  Our record format has the following:
+  -An unsigned integer representing the number of fields.
+  -An array of field offsets for each attribute(the address of the last byte of each attrbute is accessed by the record's base address and the field offset directory plus the fieldoffset).
+[A3 directory based record format as given in the slides]
+    -We have not implemented O(1) field access feature yet.
+
+- Describe how you store a VarChar field.
+  We identify the actual size of the VarChar field from the input data which is of the form [size of field][value of field] in the case of variable size fields.
+  We use this size to compute the field offset in the record and store it in the field offset directory which is in the record.
+  
+3. Page Format
+- Show your page format design
+  Our page format design is a slotted page directory.
+  It consists of a footer which has the following:
+  -The last 4 bytes stores an integer which is the offset for free space.
+  -The 4 bytes preceeding that stores the number of slots.
+  -This is followed by the slot directory which holds offsets to the records.
+
+
+4. Implementation Detail
+
+Functions in PagedFileManager:
+
+- createFile : Check if the same file exists using fileExists() method and if not then create the file using wb method.
+
+- destroyFile : Check of the file exists and if yes then destory the file remove() method.
+
+- openFile : Check if the file exists and if yes the open the file and set the open flag to 1.
+
+- closeFile : Check if the file is open using the fileHandle using the WasFileOpened flag and close the file.
+
+- readPage : Checking if a valid page exists and using fseek() set the handle to the start of the page and read the data using fread().
+
+- writePage : Validating the data and page number and setting the handle to the page start using fseek() and write the data to the page using fwrite().
+
+- appendPage : Validating the data and set the handle to end of the current file using fseek() and write the data not more than page size to the end using fwrite() thus appending a page.
+
+- getNumberOfPages : Using fseek() we get to the end of file and get the value of bytes using ftell() and divide the value by page size [4096] thus returning number of pages.
+
+- collectCounterValues : Based on the current page that is opened we grab each of the counter values and return to the driving. 
+
+
+Functions in RecordBasedFileManager class:
+
+- createFile: creates a file by using createFile() method in the PagedFileManager class.
+
+- destroyFile: Delete a file by using destroyFile() method in the PagedFileManager class.
+
+- openFile: Opens a file using openFile() in the PagedFileManager class, and then pass the file descriptor to a fileHandle.
+
+- closeFile: Closes a file by closeFile() method in the PagedFileManager class and resets fileHandle to NULL.
+
+- insertRecord: 
+                -Checks if is the first record in the fileHandle. Allocates page footer with freeSpaceOffset, NumofSlots and slot directory. 
+                -Allocates memory for a record. 
+                -Iterates through the recordDescriptor with a dataOffset and attributeOffset for each field. 
+                -Adds offsets, values into the record according to our record format i.e fieldCount + field Offsets Array + Field Values
+                -If NULL bit in Nulls Indicator is set, address pointer in field Offsets array points to same address as the previous.
+                -Calculates record Size from last field offset
+                -Pushes record to page and write the page onto the file. 
+
+- readRecord: 
+                -Uses readPage to read page using the pageNum from given rid     
+                -Calulcates recordLength using the last field's offset in the record.
+                -Reads the record into the data buffer from the page till recordLength
+
+- printRecord: 
+                -Stores a prevOffset and CurrentOffset.
+                -Since our record format does not have NullsIndicator bits, we calculate whether a value is NULL by finding the diff of currentOffset and prevOffset.
+                -If this difference is zero, the value is simply printed as NULL.
+                -If the value is non null we go the currentOffset, and the value is read from the record.
+                -The data is typecasted according to the attributeType computed from recordDescriptor
+                -The typecasted value is printed to the terminal along with the attribute name.
+
+
